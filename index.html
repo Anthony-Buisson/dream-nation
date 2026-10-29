@@ -17,7 +17,7 @@
 <style>
 @font-face { font-family: "Oswald"; src: url(fonts/oswald.woff2) format("woff2"); font-weight: 200 700; font-display: swap; }
 
-/* Layout: poster-like three-stage timeline per night, hour rail on the left, live panel on top. Single dark look, like the flyer. */
+/* Layout: poster-like three-stage timeline per night, hour rail on the left, played sets folded away as the night goes on. Single dark look, like the flyer. */
 :root {
   --bg: #05070a;
   --ink: #f2f4f7;
@@ -84,7 +84,7 @@ body::after {
 .date[aria-pressed="true"] { opacity: 1; border-color: var(--pink); box-shadow: 0 0 0 1px var(--pink), 0 0 22px rgba(255, 61, 139, .45); }
 .date[aria-pressed="true"] .dow { color: var(--pink); }
 .date:active { transform: scale(.96); }
-.date:focus-visible, .slot:focus-visible, .live-card:focus-visible, .btn:focus-visible { outline: 2px solid var(--pink); outline-offset: 3px; }
+.date:focus-visible, .slot:focus-visible, .btn:focus-visible { outline: 2px solid var(--pink); outline-offset: 3px; }
 
 .daybar { display: grid; justify-items: center; gap: 6px; }
 .daybar h2 {
@@ -95,26 +95,10 @@ body::after {
 .hint { text-align: center; font-size: 12px; color: var(--muted); letter-spacing: .06em; }
 .meta { color: var(--muted); font-size: 13px; letter-spacing: .14em; text-transform: uppercase; text-align: center; }
 
-/* Live panel */
-.live { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
-.live-card {
-  position: relative; border: 1px solid color-mix(in srgb, var(--c) 55%, transparent); border-radius: 6px; padding: 10px 12px 12px; min-width: 0;
-  background: linear-gradient(160deg, var(--deep), rgba(0, 0, 0, .7));
-  display: grid; gap: 5px; align-content: start; text-align: left; color: inherit; font: inherit; cursor: pointer;
-}
-.live-card[data-col="0"], .slot[data-col="0"], .sheet[data-col="0"], .head[data-col="0"] { --c: var(--c0); --deep: var(--c0-deep); }
-.live-card[data-col="1"], .slot[data-col="1"], .sheet[data-col="1"], .head[data-col="1"] { --c: var(--c1); --deep: var(--c1-deep); }
-.live-card[data-col="2"], .slot[data-col="2"], .sheet[data-col="2"], .head[data-col="2"] { --c: var(--c2); --deep: var(--c2-deep); }
-.live-card:disabled { cursor: default; }
-.live-card .k { font-size: 12px; letter-spacing: .14em; text-transform: uppercase; color: var(--c); display: flex; align-items: center; gap: 6px; }
-.live-card .n { font-size: clamp(17px, 4.6vw, 22px); font-weight: 700; text-transform: uppercase; line-height: 1.05; overflow-wrap: anywhere; }
-.live-card .t { font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
-.bar { height: 4px; background: rgba(255, 255, 255, .1); overflow: hidden; border-radius: 2px; }
-.bar i { display: block; height: 100%; width: 0; background: var(--c); }
-.live-card .next { font-size: 12px; color: var(--muted); letter-spacing: .03em; }
-.live-card .next b { color: var(--ink); font-weight: 500; text-transform: uppercase; }
-.dot { width: 8px; height: 8px; border-radius: 50%; background: var(--pink); box-shadow: 0 0 0 0 rgba(255, 61, 139, .7); animation: pulse 1.6s infinite; flex: none; }
-@keyframes pulse { 70% { box-shadow: 0 0 0 9px rgba(255, 61, 139, 0); } 100% { box-shadow: 0 0 0 0 rgba(255, 61, 139, 0); } }
+/* Countdown while the stages are closed */
+.slot[data-col="0"], .chip[data-col="0"], .sheet[data-col="0"], .head[data-col="0"] { --c: var(--c0); --deep: var(--c0-deep); }
+.slot[data-col="1"], .chip[data-col="1"], .sheet[data-col="1"], .head[data-col="1"] { --c: var(--c1); --deep: var(--c1-deep); }
+.slot[data-col="2"], .chip[data-col="2"], .sheet[data-col="2"], .head[data-col="2"] { --c: var(--c2); --deep: var(--c2-deep); }
 .offhours { grid-column: 1 / -1; text-align: center; border: 1px dashed var(--line); border-radius: 6px; color: var(--muted); display: grid; gap: 4px; padding: 16px 14px 18px; background: rgba(0, 0, 0, .6); }
 .offhours .k { font-size: 13px; letter-spacing: .16em; text-transform: uppercase; }
 .countdown { font-size: clamp(40px, 12vw, 68px); font-weight: 700; line-height: 1; color: var(--ink); letter-spacing: .02em; font-variant-numeric: tabular-nums; }
@@ -161,19 +145,51 @@ body::after {
   border-color: var(--c); border-width: 2px;
   box-shadow: 0 0 0 1px var(--c), 0 0 22px color-mix(in srgb, var(--c) 75%, transparent);
   background: linear-gradient(180deg, color-mix(in srgb, var(--c) 60%, #000), color-mix(in srgb, var(--c) 25%, #000));
-  z-index: 2;
 }
-.slot.now::after {
-  content: "EN DIRECT"; position: absolute; top: -7px; right: 4px; padding: 1px 5px 0;
-  font-size: 9px; letter-spacing: .1em; background: var(--pink); color: #22030f; border-radius: 3px;
+.slot .badge {
+  display: none; position: absolute; top: -8px; right: 4px; padding: 1px 5px 0;
+  font-size: 9px; letter-spacing: .1em; background: var(--pink); color: #22030f; border-radius: 3px; line-height: 1.4;
+  border: 1px solid rgba(255, 214, 230, .45); animation: glow 2.4s ease-in-out infinite;
+  z-index: 4; /* above the now line (z-index 3), which still crosses the slot itself */
 }
+.slot.now .badge { display: inline-block; }
+/* The live label's border breathes: a soft pink glow that swells and fades. */
+@keyframes glow {
+  0%, 100% { border-color: rgba(255, 214, 230, .45); box-shadow: 0 0 2px rgba(255, 61, 139, .35); }
+  50% { border-color: #ffe3ee; box-shadow: 0 0 10px 2px rgba(255, 61, 139, .9); }
+}
+.slot.now .tm { font-weight: 700; opacity: 1; }
 .skull { width: 1em; height: 1em; fill: currentColor; vertical-align: -.12em; flex: none; }
 .slot .star { display: none; position: absolute; top: 3px; left: 4px; font-size: 13px; line-height: 0; color: var(--fav); filter: drop-shadow(0 0 4px rgba(0, 0, 0, .9)); }
 .slot.fav .star { display: block; }
 .slot.fav { border: 2px solid var(--fav); box-shadow: 0 0 0 1px color-mix(in srgb, var(--fav) 35%, transparent), 0 0 16px color-mix(in srgb, var(--fav) 45%, transparent); }
 .slot.fav.now { box-shadow: 0 0 0 1px var(--fav), 0 0 26px color-mix(in srgb, var(--fav) 70%, transparent); }
 .slot.fav.past { box-shadow: none; }
-.live-card .n .skull { color: var(--fav); margin-right: .25em; }
+
+/* Sets already played, folded above the grid once every stage has moved past them */
+.past { --gap: 8px; }
+.past > summary {
+  margin-left: calc(var(--rail) + var(--gap)); list-style: none; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;
+  padding: 6px 10px; border: 1px dashed var(--line); border-radius: 6px; background: rgba(0, 0, 0, .6);
+  font-size: 13px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted);
+}
+.past > summary::-webkit-details-marker { display: none; }
+.past > summary::before { content: "▸"; transition: transform .2s; }
+.past[open] > summary::before { transform: rotate(90deg); }
+.past > summary:focus-visible { outline: 2px solid var(--pink); outline-offset: 3px; }
+.past-cols { display: grid; grid-template-columns: var(--rail) repeat(3, 1fr); column-gap: var(--gap); margin-top: 8px; }
+.past-col { display: grid; align-content: start; gap: 4px; min-width: 0; }
+.past-col:first-child { grid-column: 2; }
+.chip {
+  display: grid; gap: 1px; padding: 4px 5px; min-width: 0; text-align: center; cursor: pointer;
+  font: inherit; color: var(--ink); text-transform: uppercase; opacity: .55;
+  background: var(--deep); border: 1px solid color-mix(in srgb, var(--c) 55%, transparent); border-radius: 5px;
+}
+.chip b { font-size: clamp(11px, 3vw, 15px); font-weight: 700; line-height: 1.05; overflow-wrap: anywhere; }
+.chip b small { font-size: .62em; font-weight: 500; }
+.chip span { font-size: clamp(9px, 2.4vw, 12px); font-variant-numeric: tabular-nums; }
+.chip.fav { border: 2px solid var(--fav); opacity: .75; }
+.chip:focus-visible { outline: 2px solid var(--pink); outline-offset: 2px; }
 .nowline { position: absolute; left: calc(var(--rail) - 6px); right: 0; height: 0; border-top: 2px solid var(--pink); z-index: 3; pointer-events: none; box-shadow: 0 0 10px var(--pink); }
 .nowline::before { content: ""; position: absolute; left: -5px; top: -6px; width: 10px; height: 10px; border-radius: 50%; background: var(--pink); }
 
@@ -239,22 +255,16 @@ footer summary.on { color: var(--pink); }
 .simrow input, .simrow select { font: inherit; font-size: 15px; color: var(--ink); background: #10141a; border: 1px solid var(--line); padding: 6px 8px; border-radius: 4px; }
 [hidden], .sheet .members:empty, .tags:empty, .links:empty { display: none !important; }
 
-@media (max-width: 640px) {
-  .live { grid-template-columns: 1fr; gap: 8px; }
-  .live-card { grid-template-columns: 1fr auto; column-gap: 10px; padding: 9px 12px 10px; }
-  .live-card .k, .live-card .bar, .live-card .next { grid-column: 1 / -1; }
-  .live-card .n { font-size: 18px; }
-  .live-card .t { align-self: end; }
-}
 @media (max-width: 420px) {
   .tt { --rail: 32px; }
   .hl { font-size: 10px; }
   .grid, .heads { column-gap: 5px; }
+  .past { --gap: 5px; }
   .slot { padding: 2px 3px; }
 }
 @media (min-width: 700px) { :root { --q: 26px; } }
 @media (prefers-reduced-motion: reduce) {
-  .dot, .grid.in-l, .grid.in-r { animation: none; }
+  .slot .badge, .grid.in-l, .grid.in-r { animation: none; }
   .slot, .date { transition: none; }
 }
 </style>
@@ -276,9 +286,7 @@ footer summary.on { color: var(--pink); }
     Installer l'appli
   </button>
 
-  <section aria-label="En ce moment">
-    <div class="live" id="live"></div>
-  </section>
+  <section aria-label="Ouverture des scènes" id="live" hidden></section>
 
   <section class="tt" id="tt" aria-labelledby="ttl">
     <div class="daybar">
@@ -286,6 +294,14 @@ footer summary.on { color: var(--pink); }
       <div class="hint" id="hint">Touche une date ou fais glisser la timetable pour changer de jour</div>
     </div>
     <div class="heads" id="heads" aria-hidden="true"></div>
+    <details class="past" id="past" hidden>
+      <summary id="pastLabel"></summary>
+      <div class="past-cols">
+        <div class="past-col" data-col="0"></div>
+        <div class="past-col" data-col="1"></div>
+        <div class="past-col" data-col="2"></div>
+      </div>
+    </details>
     <div class="grid" id="grid0"></div>
     <div class="grid" id="grid1" hidden></div>
   </section>
@@ -488,11 +504,10 @@ function buildGrid(day) {
   const grid = grids[day];
   const frag = document.createDocumentFragment();
   for (let t = 0; t <= SPAN; t += 60) {
-    const pct = t / SPAN * 100;
     const tick = document.createElement("div");
-    tick.className = "tick"; tick.style.top = pct + "%";
+    tick.className = "tick"; tick.dataset.t = t;
     const lab = document.createElement("div");
-    lab.className = "hl"; lab.style.top = pct + "%";
+    lab.className = "hl"; lab.dataset.t = t;
     lab.textContent = String((20 + t / 60) % 24).padStart(2, "0") + "H00";
     frag.append(tick, lab);
   }
@@ -501,8 +516,7 @@ function buildGrid(day) {
     const b = document.createElement("button");
     b.type = "button"; b.className = "slot" + (perCol[s.col]++ % 2 ? " alt" : ""); b.dataset.col = s.col; b.dataset.id = s.id;
     b.style.gridColumn = s.col + 2;
-    b.style.gridRow = `${s.s / STEP + 1} / ${s.e / STEP + 1}`;
-    b.innerHTML = `<span class="star"><svg class="skull" viewBox="0 0 24 24" aria-hidden="true"><use href="#skull"/></svg></span><span class="nm">${nameHTML(s.name)}</span><span class="tm">${s.start.replace(":", "H")} - ${s.end.replace(":", "H")}</span>`;
+    b.innerHTML = `<span class="star"><svg class="skull" viewBox="0 0 24 24" aria-hidden="true"><use href="#skull"/></svg></span><span class="badge">EN DIRECT</span><span class="nm">${nameHTML(s.name)}</span><span class="tm">${slotTimes(s)}</span>`;
     b.setAttribute("aria-label", `${s.name}, ${DAYS[day].stages[s.col]}, ${fmt(s.start)} à ${fmt(s.end)}`);
     b.addEventListener("click", () => openArtist(s));
     frag.append(b);
@@ -511,6 +525,54 @@ function buildGrid(day) {
   line.className = "nowline"; line.hidden = true;
   frag.append(line);
   grid.append(frag);
+  layout(day, 0);
+}
+const slotTimes = s => `${s.start.replace(":", "H")} - ${s.end.replace(":", "H")}`;
+
+// The grid starts at `cut` (minutes after 20h00): sets that started before it are folded into the list above the grid.
+const cutAt = [0, 0];
+function layout(day, cut) {
+  cutAt[day] = cut;
+  const grid = grids[day], span = SPAN - cut;
+  grid.style.gridTemplateRows = `repeat(${span / STEP}, var(--q))`;
+  grid.querySelectorAll(".tick, .hl").forEach(el => {
+    const t = +el.dataset.t;
+    el.hidden = t < cut;
+    el.style.top = (t - cut) / span * 100 + "%";
+  });
+  grid.querySelectorAll(".slot").forEach(el => {
+    const s = slots[el.dataset.id];
+    el.hidden = s.s < cut;
+    if (!el.hidden) el.style.gridRow = `${(s.s - cut) / STEP + 1} / ${(s.e - cut) / STEP + 1}`;
+  });
+}
+// Fold the night up to the earliest set still playing or to come on any stage. Stages change sets at different times,
+// so a stage that is still playing keeps everything from its current set on; a set that started earlier is over everywhere.
+function cutFor(day, m) {
+  const open = slots.filter(s => s.day === day && s.e > m);
+  if (!open.length) return 0;
+  const cut = Math.min(...open.map(s => s.s));
+  return slots.some(s => s.day === day && s.s < cut) ? cut : 0;
+}
+
+// --- folded list of the sets already played, laid out under each stage ---
+const pastEl = document.getElementById("past");
+function renderPast() {
+  const cut = cutAt[selected];
+  const list = slots.filter(s => s.day === selected && s.s < cut);
+  pastEl.hidden = !list.length;
+  if (!list.length) { pastEl.open = false; return; }
+  document.getElementById("pastLabel").textContent = `${list.length} set${list.length > 1 ? "s" : ""} déjà joué${list.length > 1 ? "s" : ""}`;
+  pastEl.querySelectorAll(".past-col").forEach(colEl => {
+    colEl.replaceChildren(...list.filter(s => s.col === +colEl.dataset.col).map(s => {
+      const b = document.createElement("button");
+      b.type = "button"; b.className = "chip" + (isFav(s) ? " fav" : ""); b.dataset.col = s.col;
+      b.innerHTML = `<b>${nameHTML(s.name)}</b><span>${slotTimes(s)}</span>`;
+      b.setAttribute("aria-label", `${s.name}, ${DAYS[s.day].stages[s.col]}, ${fmt(s.start)} à ${fmt(s.end)}, terminé`);
+      b.addEventListener("click", () => openArtist(s));
+      return b;
+    }));
+  });
 }
 
 // --- night switching: date roundels, swipe on the timetable, and the clock picks the night by default ---
@@ -527,6 +589,7 @@ function setDay(d, animate) {
   dateBtns.forEach(b => b.setAttribute("aria-pressed", String(+b.dataset.day === d)));
   document.getElementById("ttl").textContent = `Timetable ${DAYS[d].label.toLowerCase()}`;
   heads.innerHTML = DAYS[d].stages.map((n, c) => `<div class="head" data-col="${c}"><b>${n}</b><span>Stage</span></div>`).join("");
+  renderPast();
 }
 function userSetDay(d) {
   setDay(d, true);
@@ -564,7 +627,7 @@ function toggleFav(s) {
   render();
 }
 
-// --- live panel + highlighting, refreshed every 20 s ---
+// --- live highlighting, folding and countdown, refreshed every 20 s ---
 const liveEl = document.getElementById("live");
 let lastLive = null, lastDefault = null;
 function render() {
@@ -580,63 +643,36 @@ function render() {
 
   grids.forEach((grid, day) => {
     const m = minutesInto(day, date);
+    // Only the running night folds; before and after it, the whole night stays in view.
+    const cut = day === ld ? cutFor(day, m) : 0;
+    if (cut !== cutAt[day]) layout(day, cut);
     grid.querySelectorAll(".slot").forEach(el => {
       const s = slots[el.dataset.id];
       const st = status(s, m);
       el.classList.toggle("now", st === "now");
       el.classList.toggle("past", st === "past");
       el.classList.toggle("fav", isFav(s));
+      el.querySelector(".tm").textContent = st === "now" ? `Encore ${untilText(s.e - m)}` : slotTimes(s);
       if (st === "now") el.setAttribute("aria-current", "true"); else el.removeAttribute("aria-current");
     });
     const line = grid.querySelector(".nowline");
-    line.hidden = !(m >= 0 && m < SPAN);
-    if (!line.hidden) line.style.top = (m / SPAN * 100) + "%";
+    line.hidden = !(m >= cut && m < SPAN);
+    if (!line.hidden) line.style.top = ((m - cut) / (SPAN - cut) * 100) + "%";
   });
+  renderPast();
 
-  if (ld === -1) {
-    const next = DAYS.findIndex(d => d.start > date);
-    if (next === -1) {
-      liveEl.innerHTML = `<div class="offhours"><span class="k">Dream Nation 2026, c'est fini</span><b class="countdown" style="font-size:28px">Merci les ravers&nbsp;!</b></div>`;
-      return;
-    }
-    if (!document.getElementById("countdown") || liveEl.dataset.next !== String(next)) {
-      liveEl.dataset.next = next;
-      liveEl.innerHTML = `<div class="offhours"><span class="k">Ouverture des scènes dans</span><b class="countdown" id="countdown" role="timer"></b></div>`;
-    }
-    tickCountdown();
+  liveEl.hidden = ld !== -1;
+  if (ld !== -1) { liveEl.dataset.next = ""; liveEl.innerHTML = ""; return; }
+  const next = DAYS.findIndex(d => d.start > date);
+  if (next === -1) {
+    liveEl.innerHTML = `<div class="offhours"><span class="k">Dream Nation 2026, c'est fini</span><b class="countdown" style="font-size:28px">Merci les ravers&nbsp;!</b></div>`;
     return;
   }
-  liveEl.dataset.next = "";
-  liveEl.innerHTML = "";
-  const m = minutesInto(ld, date);
-  DAYS[ld].stages.forEach((stage, col) => {
-    const list = slots.filter(s => s.day === ld && s.col === col);
-    const cur = list.find(s => m >= s.s && m < s.e);
-    const nxt = list.find(s => s.s > m);
-    const card = document.createElement("button");
-    card.type = "button"; card.className = "live-card"; card.dataset.col = col;
-    if (cur) {
-      const pct = (m - cur.s) / (cur.e - cur.s) * 100;
-      card.innerHTML = `
-        <span class="k"><span class="dot"></span>${stage} · en direct</span>
-        <span class="n"></span>
-        <span class="t">Encore ${untilText(cur.e - m)}</span>
-        <span class="bar"><i style="width:${pct.toFixed(1)}%"></i></span>
-        <span class="next">${nxt ? `Ensuite : <b></b> à ${fmt(nxt.start)}` : "Dernier set de la nuit"}</span>`;
-      card.querySelector(".n").textContent = cur.name;
-      if (isFav(cur)) card.querySelector(".n").insertAdjacentHTML("afterbegin", '<svg class="skull" viewBox="0 0 24 24" aria-hidden="true"><use href="#skull"/></svg>');
-      if (nxt) card.querySelector(".next b").textContent = nxt.name;
-      card.addEventListener("click", () => { setDay(ld, true); openArtist(cur); });
-    } else if (nxt) {
-      card.innerHTML = `<span class="k">${stage}</span><span class="n"></span><span class="t">à ${fmt(nxt.start)}</span>`;
-      card.querySelector(".n").textContent = nxt.name;
-      card.addEventListener("click", () => openArtist(nxt));
-    } else {
-      card.disabled = true;
-      card.innerHTML = `<span class="k">${stage}</span><span class="n">Terminé</span>`;
-    }
-    liveEl.append(card);
-  });
+  if (!document.getElementById("countdown") || liveEl.dataset.next !== String(next)) {
+    liveEl.dataset.next = next;
+    liveEl.innerHTML = `<div class="offhours"><span class="k">Ouverture des scènes dans</span><b class="countdown" id="countdown" role="timer"></b></div>`;
+  }
+  tickCountdown();
 }
 
 // Countdown to the next night, shown while the stages are closed.
