@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Dream Nation Timetable</title>
 <meta name="claude:viewport-fit-sides" content="cover">
+<meta name="robots" content="noindex, nofollow">
 <meta name="description" content="Timetable de Dream Nation 2026, vendredi et samedi, avec les artistes en train de jouer.">
 <meta name="theme-color" content="#05070a">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -14,6 +15,15 @@
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<script>
+// Light password gate: keeps casual visitors and search engines out, not a real protection (the data stays in the page).
+const GATE_KEY = "dream-nation-acces", GATE_HASH = "41f863e0662165c6f985caaacb8de0bdc14b18fb17c7d76dd7301a4a0a50077a";
+// The installed app never asks (on iPhone it does not share Safari's storage); in the browser the password is asked once.
+const installed = matchMedia("(display-mode: standalone)").matches || navigator.standalone === true;
+let unlocked = installed;
+try { unlocked = unlocked || localStorage.getItem(GATE_KEY) === GATE_HASH; } catch (e) {}
+if (!unlocked) document.documentElement.classList.add("locked");
+</script>
 <style>
 @font-face { font-family: "Oswald"; src: url(fonts/oswald.woff2) format("woff2"); font-weight: 200 700; font-display: swap; }
 
@@ -239,6 +249,15 @@ dialog::backdrop { background: rgba(0, 0, 0, .7); backdrop-filter: blur(2px); }
 .install svg { width: 18px; height: 18px; flex: none; }
 .install:active { transform: translateY(2px); box-shadow: 0 1px 0 #6b0a33; }
 .install:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
+.gate { display: none; }
+html.locked .gate { display: grid; place-items: center; min-height: 100vh; min-height: 100dvh; padding: 24px 16px; position: relative; z-index: 1; }
+html.locked .gate ~ *, html.locked body > :not(.gate) { display: none !important; }
+.gate form { display: grid; gap: 14px; justify-items: center; width: min(320px, 100%); text-align: center; }
+.gate h1 { margin: 0; font-size: clamp(40px, 13vw, 60px); line-height: .92; text-transform: uppercase; letter-spacing: .03em; }
+.gate small { font-size: 12px; letter-spacing: .24em; text-transform: uppercase; }
+.gate input { width: 100%; font: inherit; font-size: 16px; /* under 16px iOS zooms in on focus */ letter-spacing: .08em; color: var(--ink); background: #10141a; border: 2px solid var(--pink); border-radius: 6px; padding: 10px 12px; text-align: center; }
+.gate input:focus { outline: none; box-shadow: 0 0 14px rgba(255, 61, 139, .55); }
+.gate .err { min-height: 1.3em; margin: 0; font-size: 13px; letter-spacing: .06em; color: var(--pink); }
 .howto { display: grid; gap: 14px; padding: 20px 20px 22px; }
 .howto h2 { margin: 0; font-size: 26px; line-height: 1; text-transform: uppercase; }
 .howto ol { margin: 0; padding-left: 22px; display: grid; gap: 10px; font-size: 16px; font-weight: 500; line-height: 1.35; }
@@ -265,6 +284,28 @@ footer { display: grid; gap: 10px; justify-items: center; color: var(--muted); f
 </style>
 </head>
 <body>
+<div class="gate">
+  <form id="gateForm">
+    <small>Halloween music festival</small>
+    <h1>Dream<br>Nation</h1>
+    <label for="gatePw" class="meta">Accès réservé</label>
+    <input id="gatePw" type="password" autocomplete="current-password" placeholder="Mot de passe" required>
+    <button class="install" type="submit">Entrer</button>
+    <p class="err" id="gateErr" aria-live="polite"></p>
+  </form>
+</div>
+<script>
+document.getElementById("gateForm").addEventListener("submit", async e => {
+  e.preventDefault();
+  const pw = document.getElementById("gatePw").value.trim();
+  const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(pw));
+  const hash = [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2, "0")).join("");
+  if (hash !== GATE_HASH) { document.getElementById("gateErr").textContent = "Mot de passe incorrect"; return; }
+  try { localStorage.setItem(GATE_KEY, hash); } catch (err) {}
+  document.documentElement.classList.remove("locked");
+  window.scrollTo(0, 0);
+});
+</script>
 
 <div class="wrap">
   <header class="top">
