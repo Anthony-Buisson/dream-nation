@@ -16,7 +16,8 @@
 <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <script>
-// Light password gate: keeps casual visitors and search engines out, not a real protection (the data stays in the page).
+// Light access-code gate: keeps casual visitors and search engines out, not a real protection (the data stays in the page).
+// A plain text field, not a password one, so password managers do not take the page for a login form (phishing alerts).
 const GATE_KEY = "dream-nation-acces", GATE_HASH = "41f863e0662165c6f985caaacb8de0bdc14b18fb17c7d76dd7301a4a0a50077a";
 // The installed app never asks (on iPhone it does not share Safari's storage); in the browser the password is asked once.
 const installed = matchMedia("(display-mode: standalone)").matches || navigator.standalone === true;
@@ -255,8 +256,9 @@ html.locked .gate ~ *, html.locked body > :not(.gate) { display: none !important
 .gate form { display: grid; gap: 14px; justify-items: center; width: min(320px, 100%); text-align: center; }
 .gate h1 { margin: 0; font-size: clamp(40px, 13vw, 60px); line-height: .92; text-transform: uppercase; letter-spacing: .03em; }
 .gate small { font-size: 12px; letter-spacing: .24em; text-transform: uppercase; }
-.gate input { width: 100%; font: inherit; font-size: 16px; /* under 16px iOS zooms in on focus */ letter-spacing: .08em; color: var(--ink); background: #10141a; border: 2px solid var(--pink); border-radius: 6px; padding: 10px 12px; text-align: center; }
+.gate input { width: 100%; font: inherit; font-size: 16px; /* under 16px iOS zooms in on focus */ letter-spacing: .14em; text-transform: uppercase; color: var(--ink); background: #10141a; border: 2px solid var(--pink); border-radius: 6px; padding: 10px 12px; text-align: center; }
 .gate input:focus { outline: none; box-shadow: 0 0 14px rgba(255, 61, 139, .55); }
+.gate .unofficial { margin: 6px 0 0; font-size: 12px; letter-spacing: .06em; color: var(--muted); }
 .gate .err { min-height: 1.3em; margin: 0; font-size: 13px; letter-spacing: .06em; color: var(--pink); }
 .howto { display: grid; gap: 14px; padding: 20px 20px 22px; }
 .howto h2 { margin: 0; font-size: 26px; line-height: 1; text-transform: uppercase; }
@@ -289,18 +291,19 @@ footer { display: grid; gap: 10px; justify-items: center; color: var(--muted); f
     <small>Halloween music festival</small>
     <h1>Dream<br>Nation</h1>
     <label for="gatePw" class="meta">Accès réservé</label>
-    <input id="gatePw" type="password" autocomplete="current-password" placeholder="Mot de passe" required>
+    <input id="gatePw" type="text" name="code" autocomplete="off" autocapitalize="characters" autocorrect="off" spellcheck="false" placeholder="Code d'accès" required>
     <button class="install" type="submit">Entrer</button>
     <p class="err" id="gateErr" aria-live="polite"></p>
+    <p class="unofficial">Easy Timetable · timetable non officielle, sans lien avec l'organisateur</p>
   </form>
 </div>
 <script>
 document.getElementById("gateForm").addEventListener("submit", async e => {
   e.preventDefault();
-  const pw = document.getElementById("gatePw").value.trim();
+  const pw = document.getElementById("gatePw").value.trim().toUpperCase();
   const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(pw));
   const hash = [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2, "0")).join("");
-  if (hash !== GATE_HASH) { document.getElementById("gateErr").textContent = "Mot de passe incorrect"; return; }
+  if (hash !== GATE_HASH) { document.getElementById("gateErr").textContent = "Code incorrect"; return; }
   try { localStorage.setItem(GATE_KEY, hash); } catch (err) {}
   document.documentElement.classList.remove("locked");
   window.scrollTo(0, 0);
