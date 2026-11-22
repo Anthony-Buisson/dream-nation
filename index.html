@@ -60,10 +60,10 @@ body::before {
   content: ""; position: fixed; inset: 0; pointer-events: none; z-index: 0; opacity: .32;
   background: url(topo.png) center / 640px auto repeat;
 }
-/* Blurred band behind the status bar (same as the day band) so scrolled content never shows sharp under the notch. */
+/* Opaque band behind the status bar so scrolled content never shows under the notch. */
 body::after {
-  content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; pointer-events: none;
-  background: color-mix(in srgb, var(--bg) 86%, transparent); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
+  content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10;
+  background: var(--bg); pointer-events: none;
 }
 .wrap {
   position: relative; z-index: 1;
@@ -76,6 +76,14 @@ body::after {
 
 /* Title, flanked by the two date roundels that also switch the night */
 .top { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 10px; }
+/* The header sits on the same blurred band as the day band, edge to edge and up to the top of the screen */
+.top { position: relative; isolation: isolate; }
+.top::before {
+  content: ""; position: absolute; z-index: -1; left: 50%; width: 100vw; transform: translateX(-50%);
+  top: calc(-18px - env(safe-area-inset-top, 0px)); bottom: -12px; pointer-events: none;
+  background: color-mix(in srgb, var(--bg) 70%, transparent); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--line);
+}
 .title { text-align: center; user-select: none; min-width: 0; }
 .title small { display: block; white-space: nowrap; font-size: clamp(9px, 2.5vw, 15px); letter-spacing: .24em; text-transform: uppercase; margin-bottom: 2px; padding-left: .32em; }
 .title h1 {
