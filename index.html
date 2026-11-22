@@ -80,9 +80,10 @@ body::after {
 .top { position: relative; isolation: isolate; }
 .top::before {
   content: ""; position: absolute; z-index: -1; left: 50%; width: 100vw; transform: translateX(-50%);
-  top: calc(-18px - env(safe-area-inset-top, 0px)); bottom: -12px; pointer-events: none;
+  top: calc(-18px - env(safe-area-inset-top, 0px)); bottom: -34px; pointer-events: none;
   background: color-mix(in srgb, var(--bg) 35%, transparent); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px);
-  border-bottom: 1px solid var(--line);
+  /* no bottom line: the blur fades out over its last 28 px */
+  -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 28px), transparent); mask-image: linear-gradient(to bottom, #000 calc(100% - 28px), transparent);
 }
 .title { text-align: center; user-select: none; min-width: 0; }
 .title small { display: block; white-space: nowrap; font-size: clamp(9px, 2.5vw, 15px); letter-spacing: .24em; text-transform: uppercase; margin-bottom: 2px; padding-left: .32em; }
@@ -110,10 +111,16 @@ body::after {
   position: fixed; inset: 0 0 auto; z-index: 11; display: flex; justify-content: space-between; align-items: center;
   padding: calc(6px + env(safe-area-inset-top, 0px) + min(env(safe-area-inset-top, 0px), 18px)) max(14px, env(safe-area-inset-right, 0px)) 6px max(14px, env(safe-area-inset-left, 0px));
   background: color-mix(in srgb, var(--bg) 35%, transparent); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px);
-  border-bottom: 1px solid var(--line); box-shadow: 0 6px 20px rgba(0, 0, 0, .45);
   transform: translateY(-110%); transition: transform .25s ease-out; pointer-events: none;
 }
 .daystrip.on { transform: none; pointer-events: auto; }
+/* No bottom line: the band reaches 24 px further down and its blur fades out there (only the buttons take taps) */
+.daystrip {
+  padding-bottom: 30px;
+  -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 24px), transparent); mask-image: linear-gradient(to bottom, #000 calc(100% - 24px), transparent);
+}
+.daystrip.on { pointer-events: none; }
+.daystrip.on button { pointer-events: auto; }
 .stripname { flex: 1; min-width: 0; padding: 0 6px; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: 700; text-transform: uppercase; line-height: 1; font-size: clamp(18px, 5.4vw, 34px); letter-spacing: .03em; }
 .daybar { display: grid; justify-items: center; gap: 6px; }
 .daybar h2 {
