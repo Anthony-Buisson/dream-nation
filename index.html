@@ -60,10 +60,10 @@ body::before {
   content: ""; position: fixed; inset: 0; pointer-events: none; z-index: 0; opacity: .32;
   background: url(topo.png) center / 640px auto repeat;
 }
-/* Opaque band behind the status bar so scrolled content never shows under the notch. */
+/* Blurred band behind the status bar (same as the day band) so scrolled content never shows sharp under the notch. */
 body::after {
-  content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10;
-  background: var(--bg); pointer-events: none;
+  content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; pointer-events: none;
+  background: color-mix(in srgb, var(--bg) 86%, transparent); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
 }
 .wrap {
   position: relative; z-index: 1;
@@ -97,7 +97,7 @@ body::after {
 .date:active { transform: scale(.96); }
 .date:focus-visible, .slot:focus-visible, .btn:focus-visible { outline: 2px solid var(--pink); outline-offset: 3px; }
 
-/* Once the header has scrolled away: a thin fixed band with only the two days, at their normal size */
+/* Once the header has scrolled away: a thin fixed band with the two days and the festival's name, at their normal size */
 .daystrip {
   position: fixed; inset: 0 0 auto; z-index: 11; display: flex; justify-content: space-between; align-items: center;
   padding: calc(6px + env(safe-area-inset-top, 0px) + min(env(safe-area-inset-top, 0px), 18px)) max(14px, env(safe-area-inset-right, 0px)) 6px max(14px, env(safe-area-inset-left, 0px));
@@ -106,6 +106,7 @@ body::after {
   transform: translateY(-110%); transition: transform .25s ease-out; pointer-events: none;
 }
 .daystrip.on { transform: none; pointer-events: auto; }
+.stripname { flex: 1; min-width: 0; padding: 0 6px; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: 700; text-transform: uppercase; line-height: 1; font-size: clamp(18px, 5.4vw, 34px); letter-spacing: .03em; }
 .daybar { display: grid; justify-items: center; gap: 6px; }
 .daybar h2 {
   margin: 0; padding: 4px 18px 2px; border: 3px solid var(--pink); border-radius: 8px;
@@ -323,6 +324,7 @@ document.getElementById("gateForm").addEventListener("submit", async e => {
 <!-- Outside .wrap, whose z-index would keep it under the opaque notch band (body::after) in the installed app -->
 <nav class="daystrip" id="daystrip" aria-label="Jours">
   <button class="date" type="button" data-day="0" aria-pressed="true" aria-label="Vendredi 30 octobre"><span class="dow">VEN</span><b>30</b><span>OCT</span></button>
+  <span class="stripname" aria-hidden="true">Dream Nation</span>
   <button class="date" type="button" data-day="1" aria-pressed="false" aria-label="Samedi 31 octobre"><span class="dow">SAM</span><b>31</b><span>OCT</span></button>
 </nav>
 
