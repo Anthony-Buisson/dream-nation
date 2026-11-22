@@ -81,7 +81,7 @@ body::after {
 .top::before {
   content: ""; position: absolute; z-index: -1; left: 50%; width: 100vw; transform: translateX(-50%);
   top: calc(-18px - env(safe-area-inset-top, 0px)); bottom: -12px; pointer-events: none;
-  background: color-mix(in srgb, var(--bg) 70%, transparent); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
+  background: color-mix(in srgb, var(--bg) 35%, transparent); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px);
   border-bottom: 1px solid var(--line);
 }
 .title { text-align: center; user-select: none; min-width: 0; }
@@ -109,7 +109,7 @@ body::after {
 .daystrip {
   position: fixed; inset: 0 0 auto; z-index: 11; display: flex; justify-content: space-between; align-items: center;
   padding: calc(6px + env(safe-area-inset-top, 0px) + min(env(safe-area-inset-top, 0px), 18px)) max(14px, env(safe-area-inset-right, 0px)) 6px max(14px, env(safe-area-inset-left, 0px));
-  background: color-mix(in srgb, var(--bg) 86%, transparent); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
+  background: color-mix(in srgb, var(--bg) 35%, transparent); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px);
   border-bottom: 1px solid var(--line); box-shadow: 0 6px 20px rgba(0, 0, 0, .45);
   transform: translateY(-110%); transition: transform .25s ease-out; pointer-events: none;
 }
